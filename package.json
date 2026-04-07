@@ -1,6 +1,7 @@
 {
   "name": "stellar-poll",
   "version": "1.0.0",
+  "description": "On-chain voting dApp built with React and Stellar Soroban",
   "private": true,
   "dependencies": {
     "react": "^18.2.0",

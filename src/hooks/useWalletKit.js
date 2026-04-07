@@ -1,9 +1,10 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import {
   StellarWalletsKit,
   WalletNetwork,
   FREIGHTER_ID,
   XBULL_ID,
+  ALBEDO_ID,
   allowAllModules,
 } from '@creit.tech/stellar-wallets-kit'
 
@@ -22,28 +23,54 @@ function getKit() {
 
 export function useWalletKit() {
   const [publicKey, setPublicKey] = useState(null)
-  const [status, setStatus] = useState('idle')
+  const [status, setStatus] = useState('idle') // idle, connecting, connected, error
   const [error, setError] = useState(null)
 
   const connect = useCallback(async (walletId = FREIGHTER_ID) => {
     setStatus('connecting')
     setError(null)
+
     try {
       const k = getKit()
       await k.setWallet(walletId)
-      const { address } = await k.getAddress()
-      if (!address) throw new Error('WALLET_NOT_FOUND')
-      setPublicKey(address)
+      const { publicKey: key } = await k.getPublicKey()
+
+      if (!key) {
+        throw new Error('No public key returned')
+      }
+
+      setPublicKey(key)
       setStatus('connected')
     } catch (err) {
       const msg = err.message || ''
-      if (msg.includes('WALLET_NOT_FOUND') || msg.includes('not found') || msg.includes('install')) {
-        setError({ code: 'WALLET_NOT_FOUND', message: 'Wallet not installed. Please install Freighter.' })
-      } else if (msg.includes('reject') || msg.includes('cancel') || msg.includes('denied')) {
-        setError({ code: 'REJECTED', message: 'Connection rejected. Please approve in your wallet.' })
+      console.error('Wallet connection error:', msg)
+
+      if (
+        msg.includes('not found') ||
+        msg.includes('install') ||
+        msg.includes('not installed')
+      ) {
+        setError({
+          code: 'WALLET_NOT_FOUND',
+          message: 'Wallet extension not found. Please install it.',
+        })
+      } else if (msg.includes('rejected') || msg.includes('denied')) {
+        setError({
+          code: 'REJECTED',
+          message: 'Connection rejected. Please approve in your wallet.',
+        })
+      } else if (msg.includes('network') || msg.includes('testnet')) {
+        setError({
+          code: 'NETWORK_MISMATCH',
+          message: 'Please set your wallet to Stellar Testnet.',
+        })
       } else {
-        setError({ code: 'UNKNOWN', message: msg || 'Connection failed.' })
+        setError({
+          code: 'UNKNOWN',
+          message: msg || 'Connection failed. Please try again.',
+        })
       }
+
       setStatus('error')
     }
   }, [])
@@ -55,13 +82,40 @@ export function useWalletKit() {
   }, [])
 
   const sign = useCallback(async (xdr) => {
-    const k = getKit()
-    const { signedTxXdr } = await k.signTransaction(xdr, {
-      network: WalletNetwork.TESTNET,
-      networkPassphrase: 'Test SDF Network ; September 2015',
-    })
-    return signedTxXdr
-  }, [])
+    if (!publicKey) {
+      throw new Error('Wallet not connected')
+    }
 
-  return { publicKey, status, error, connect, disconnect, sign, FREIGHTER_ID, XBULL_ID }
+    try {
+      const k = getKit()
+      const { signedTxXdr } = await k.signTransaction(xdr, {
+        network: WalletNetwork.TESTNET,
+        networkPassphrase: 'Test SDF Network ; September 2015',
+      })
+
+      if (!signedTxXdr) {
+        throw new Error('No signed transaction returned')
+      }
+
+      return signedTxXdr
+    } catch (err) {
+      const msg = err.message || ''
+      if (msg.includes('rejected') || msg.includes('denied')) {
+        throw new Error('REJECTED')
+      }
+      throw err
+    }
+  }, [publicKey])
+
+  return {
+    publicKey,
+    status,
+    error,
+    connect,
+    disconnect,
+    sign,
+    FREIGHTER_ID,
+    XBULL_ID,
+    ALBEDO_ID,
+  }
 }

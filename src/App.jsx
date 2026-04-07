@@ -4,8 +4,14 @@ import WalletModal from './components/WalletModal'
 import PollCard from './components/PollCard'
 
 export default function App() {
-  const { publicKey, status, error, connect, disconnect, sign, FREIGHTER_ID } = useWalletKit()
+  const { publicKey, status, error, connect, disconnect, sign, FREIGHTER_ID, XBULL_ID, ALBEDO_ID } = useWalletKit()
   const [showModal, setShowModal] = useState(false)
+
+  const walletOptions = [
+    { id: FREIGHTER_ID, name: 'Freighter', description: 'Most popular Stellar wallet' },
+    { id: XBULL_ID, name: 'xBull', description: 'Feature-rich Stellar wallet' },
+    { id: ALBEDO_ID, name: 'Albedo', description: 'Web-based, no install needed' },
+  ]
 
   const short = (k) => k ? k.slice(0, 6) + '...' + k.slice(-4) : ''
 
@@ -34,8 +40,20 @@ export default function App() {
             </>
           ) : (
             <button onClick={() => setShowModal(true)}
-              style={{ background: '#6366f1', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 22px', cursor: 'pointer', fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: 14 }}>
-              Connect Wallet
+              disabled={status === 'connecting'}
+              style={{ 
+                background: status === 'connecting' ? '#4a4a6a' : '#6366f1', 
+                color: '#fff', 
+                border: 'none', 
+                borderRadius: 10, 
+                padding: '10px 22px', 
+                cursor: status === 'connecting' ? 'not-allowed' : 'pointer', 
+                fontFamily: 'Space Grotesk, sans-serif', 
+                fontWeight: 700, 
+                fontSize: 14,
+                transition: 'all 0.2s'
+              }}>
+              {status === 'connecting' ? 'Connecting...' : 'Connect Wallet'}
             </button>
           )}
         </div>
@@ -66,6 +84,8 @@ export default function App() {
           }}
           onClose={() => setShowModal(false)}
           error={error}
+          status={status}
+          walletOptions={walletOptions}
         />
       )}
     </div>
