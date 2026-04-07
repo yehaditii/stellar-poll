@@ -297,23 +297,26 @@ src/
 ## Screenshots
 
 ### 1. Wallet Connection Screen
-![Wallet Selection](./docs/wallet-modal.png)
-- Shows available wallet options
+![Wallet Selection](./public/screenshots/wallet-ui.svg)
+- Shows available wallet options (Freighter, xBull, Albedo)
 - Install links for missing wallets
-- Professional modal design
+- Professional modal design with clean typography
 
 ### 2. Voting Interface
-![Voting UI](./docs/voting-interface.png)
+![Voting UI](./public/screenshots/voting-ui.svg)
 - Poll question clearly displayed
-- Three voting options
-- Real-time vote counts
-- "LIVE ON-CHAIN" indicator
+- Three voting options (Stellar, Ethereum, Solana)
+- Real-time vote counts with percentage
+- Active vote indicator
+- Professional layout without emojis
 
-### 3. Transaction Processing
-![Transaction Status](./docs/transaction-status.png)
-- Transaction hash displayed
-- Success confirmation
-- Link to Stellar Explorer
+### 3. Vote Results
+![Vote Results](./public/screenshots/results-ui.svg)
+- Vote counts displayed in real-time
+- Percentage calculations per option
+- Winner highlighting
+- Transaction hash with Stellar Explorer link
+- Success confirmation message
 
 ## Deployment
 

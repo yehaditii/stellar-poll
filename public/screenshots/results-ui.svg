@@ -1,0 +1,66 @@
+<svg width="600" height="700" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .bg { fill: #f9fafb; }
+      .header { fill: #4f46e5; }
+      .title { font-size: 24px; font-weight: bold; fill: white; }
+      .success-banner { fill: #d1fae5; }
+      .success-text { font-size: 14px; fill: #065f46; font-weight: 600; }
+      .result-box { fill: white; stroke: #e5e7eb; stroke-width: 2; rx: 8; }
+      .result-title { font-size: 18px; fill: #1f2937; font-weight: 600; }
+      .result-value { font-size: 16px; fill: #10b981; font-weight: 700; }
+      .address { font-size: 12px; fill: #6b7280; font-family: monospace; }
+      .link { font-size: 12px; fill: #4f46e5; text-decoration: underline; }
+      .label { font-size: 13px; fill: #6b7280; }
+      .winner { fill: #fef3c7; }
+      .winner-text { font-size: 12px; fill: #92400e; }
+    </style>
+  </defs>
+  
+  <!-- Background -->
+  <rect class="bg" width="600" height="700"/>
+  
+  <!-- Header -->
+  <rect class="header" width="600" height="70"/>
+  <text class="title" x="20" y="45">StellarPoll</text>
+  <text class="address" x="20" y="65">Connected: GDY5G3PQFH...XJH7PYQWE</text>
+  
+  <!-- Success Banner -->
+  <rect class="success-banner" x="30" y="90" width="540" height="50" rx="6"/>
+  <text class="success-text" x="50" y="120">Vote successfully recorded on-chain!</text>
+  
+  <!-- Transaction Hash -->
+  <rect class="result-box" x="30" y="160" width="540" height="80" rx="6"/>
+  <text class="label" x="50" y="180">Transaction Hash</text>
+  <text class="address" x="50" y="205">2f8f635d4d6bdd214c673f88b2dc8505...</text>
+  <text class="link" x="50" y="225">View on Stellar Explorer →</text>
+  
+  <!-- Vote Results -->
+  <text class="result-title" x="40" y="280">Final Results</text>
+  
+  <!-- Stellar -->
+  <rect class="result-box" x="30" y="300" width="540" height="90" rx="6"/>
+  <text class="result-title" x="50" y="325">Stellar</text>
+  <text class="result-value" x="50" y="350">8 votes (32%)</text>
+  <rect x="50" y="365" width="231" height="8" fill="#10b981" rx="4"/>
+  <rect x="281" y="365" width="289" height="8" fill="#e5e7eb" rx="4"/>
+  
+  <!-- Ethereum - Winner -->
+  <rect class="winner" x="30" y="400" width="540" height="90" rx="6"/>
+  <text class="result-title" x="50" y="425">Ethereum</text>
+  <text class="result-value" x="50" y="450">13 votes (52%)</text>
+  <rect x="50" y="465" width="260" height="8" fill="#4f46e5" rx="4"/>
+  <rect x="310" y="465" width="260" height="8" fill="#e5e7eb" rx="4"/>
+  <text class="winner-text" x="460" y="425">LEADING</text>
+  
+  <!-- Solana -->
+  <rect class="result-box" x="30" y="500" width="540" height="90" rx="6"/>
+  <text class="result-title" x="50" y="525">Solana</text>
+  <text class="result-value" x="50" y="550">4 votes (16%)</text>
+  <rect x="50" y="565" width="64" height="8" fill="#f97316" rx="4"/>
+  <rect x="114" y="565" width="456" height="8" fill="#e5e7eb" rx="4"/>
+  
+  <!-- Status -->
+  <text class="label" x="40" y="630">Status: Vote locked (one per wallet)</text>
+  <text class="address" x="40" y="670">Real-time updates enabled • Network: Stellar Testnet</text>
+</svg>

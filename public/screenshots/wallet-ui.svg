@@ -1,0 +1,42 @@
+<svg width="400" height="500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .bg { fill: #f3f4f6; }
+      .header { fill: #4f46e5; }
+      .title { font-size: 24px; font-weight: bold; fill: white; }
+      .subtitle { font-size: 14px; fill: #6b7280; }
+      .button { fill: #e5e7eb; stroke: #d1d5db; stroke-width: 1; }
+      .button-text { font-size: 14px; fill: #1f2937; font-weight: 600; }
+      .wallet-option { fill: white; stroke: #e5e7eb; stroke-width: 2; rx: 8; }
+      .wallet-name { font-size: 16px; fill: #1f2937; font-weight: 600; }
+      .wallet-desc { font-size: 12px; fill: #9ca3af; }
+    </style>
+  </defs>
+  
+  <!-- Background -->
+  <rect class="bg" width="400" height="500"/>
+  
+  <!-- Header -->
+  <rect class="header" width="400" height="80"/>
+  <text class="title" x="20" y="50">StellarPoll</text>
+  
+  <!-- Modal Title -->
+  <text class="title" x="20" y="130" style="font-size: 20px; fill: #1f2937;">Select Wallet</text>
+  <text class="subtitle" x="20" y="155">Choose a wallet to connect and vote</text>
+  
+  <!-- Freighter Button -->
+  <rect class="wallet-option" x="20" y="180" width="360" height="70"/>
+  <text class="wallet-name" x="40" y="210">Freighter</text>
+  <text class="wallet-desc" x="40" y="228">Recommended - Browser Extension</text>
+  <circle cx="360" cy="215" r="6" fill="#10b981"/>
+  
+  <!-- xBull Button -->
+  <rect class="wallet-option" x="20" y="270" width="360" height="70"/>
+  <text class="wallet-name" x="40" y="300">xBull</text>
+  <text class="wallet-desc" x="40" y="318">Feature-rich Stellar Wallet</text>
+  
+  <!-- Albedo Button -->
+  <rect class="wallet-option" x="20" y="360" width="360" height="70"/>
+  <text class="wallet-name" x="40" y="390">Albedo</text>
+  <text class="wallet-desc" x="40" y="408">Web-based, No Installation</text>
+</svg>
