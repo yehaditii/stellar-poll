@@ -61,8 +61,8 @@ export default function PollCard({ publicKey, sign }) {
 
   if (loading) return (
     <div style={{ textAlign: 'center', padding: 60, color: '#444' }}>
-      <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
-      Loading poll data...
+      <div style={{ fontSize: 24, marginBottom: 12, fontWeight: 700 }}>Loading</div>
+      <p>Loading poll data...</p>
     </div>
   )
 
@@ -73,7 +73,7 @@ export default function PollCard({ publicKey, sign }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
           <span className="live-dot" style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }}></span>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#22c55e' }}>LIVE ON-CHAIN</span>
-          <span style={{ fontSize: 11, color: '#444', marginLeft: 'auto' }} className="mono">{totalVotes} votes</span>
+          <span style={{ fontSize: 11, color: '#444', marginLeft: 'auto' }} className="mono">{totalVotes} total votes</span>
         </div>
         <h2 style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.3 }}>{POLL_QUESTION}</h2>
       </div>
@@ -110,8 +110,7 @@ export default function PollCard({ publicKey, sign }) {
                 }} />
               )}
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{ fontSize: 24 }}>{opt.emoji}</span>
+                <div>
                   <span style={{ fontWeight: 600, fontSize: 16 }}>{opt.label}</span>
                 </div>
                 {hasVoted && (
@@ -121,7 +120,7 @@ export default function PollCard({ publicKey, sign }) {
                   </div>
                 )}
                 {!hasVoted && isSelected && (
-                  <span style={{ width: 20, height: 20, borderRadius: '50%', background: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>✓</span>
+                  <span style={{ width: 20, height: 20, borderRadius: '50%', background: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#fff', fontWeight: 'bold' }}>✓</span>
                 )}
               </div>
             </button>
@@ -139,21 +138,22 @@ export default function PollCard({ publicKey, sign }) {
 
       {txStatus === TX_STATUS.SUCCESS && txHash && (
         <div style={{ background: '#0a1a0a', border: '1px solid #22c55e30', borderRadius: 12, padding: '14px 18px', marginBottom: 16 }}>
-          <div style={{ fontSize: 13, color: '#22c55e', fontWeight: 600, marginBottom: 6 }}>✓ Vote recorded on-chain!</div>
+          <div style={{ fontSize: 13, color: '#22c55e', fontWeight: 600, marginBottom: 6 }}>Vote recorded on-chain</div>
           <div style={{ fontSize: 11, fontFamily: 'DM Mono, monospace', color: '#555', wordBreak: 'break-all', marginBottom: 8 }}>{txHash}</div>
           <a href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} target="_blank" rel="noreferrer"
             style={{ fontSize: 12, color: '#6366f1', textDecoration: 'none', fontWeight: 600 }}>
-            View on Explorer ↗
+            View on Explorer
           </a>
         </div>
       )}
 
       {txStatus === TX_STATUS.ERROR && txError && (
         <div style={{ background: '#1a0808', border: '1px solid #ff444430', borderRadius: 12, padding: '14px 18px', marginBottom: 16 }}>
-          <div style={{ fontSize: 13, color: '#ff8888', fontWeight: 600, marginBottom: 4 }}>
-            {txError.code === 'ALREADY_VOTED' && '🗳 '}
-            {txError.code === 'REJECTED' && '❌ '}
-            {txError.code === 'INSUFFICIENT_BALANCE' && '💸 '}
+          <div style={{ fontSize: 13, color: '#ff8888', fontWeight: 600 }}>
+            {txError.code === 'ALREADY_VOTED' && 'Already Voted: '}
+            {txError.code === 'REJECTED' && 'Rejected: '}
+            {txError.code === 'INSUFFICIENT_BALANCE' && 'Insufficient Balance: '}
+            {txError.code === 'UNKNOWN' && 'Error: '}
             {txError.message}
           </div>
         </div>
@@ -176,13 +176,13 @@ export default function PollCard({ publicKey, sign }) {
             fontSize: 16,
             transition: 'all 0.2s',
           }}>
-          {txStatus === TX_STATUS.PENDING ? '⏳ Submitting...' : 'Cast Vote On-Chain'}
+          {txStatus === TX_STATUS.PENDING ? 'Submitting...' : 'Cast Vote On-Chain'}
         </button>
       )}
 
       {hasVoted && (
         <div style={{ textAlign: 'center', padding: '16px', color: '#22c55e', fontWeight: 600, fontSize: 15 }}>
-          🗳 Your vote has been recorded on the Stellar blockchain
+          Your vote has been recorded on the Stellar blockchain
         </div>
       )}
 
