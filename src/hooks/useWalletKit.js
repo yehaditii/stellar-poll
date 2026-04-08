@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import {
   StellarWalletsKit,
   WalletNetwork,
@@ -8,22 +8,22 @@ import {
   allowAllModules,
 } from '@creit.tech/stellar-wallets-kit'
 
-let kit = null
+const kitRef = { current: null }
 
-function getKit() {
-  if (!kit) {
-    kit = new StellarWalletsKit({
+function initializeKit() {
+  if (!kitRef.current) {
+    kitRef.current = new StellarWalletsKit({
       network: WalletNetwork.TESTNET,
       selectedWalletId: FREIGHTER_ID,
       modules: allowAllModules(),
     })
   }
-  return kit
+  return kitRef.current
 }
 
 export function useWalletKit() {
   const [publicKey, setPublicKey] = useState(null)
-  const [status, setStatus] = useState('idle') // idle, connecting, connected, error
+  const [status, setStatus] = useState('idle')
   const [error, setError] = useState(null)
 
   const connect = useCallback(async (walletId = FREIGHTER_ID) => {
@@ -31,43 +31,53 @@ export function useWalletKit() {
     setError(null)
 
     try {
-      const k = getKit()
-      await k.setWallet(walletId)
-      const { publicKey: key } = await k.getPublicKey()
+      const kit = initializeKit()
+      await kit.setWallet(walletId)
+      
+      // Get wallet public key
+      let key
+      try {
+        key = await kit.getAddress()
+      } catch (err) {
+        console.warn('getAddress not available, trying alternative...')
+        const pubKeyObj = await kit.getPublicKey()
+        key = pubKeyObj?.publicKey || pubKeyObj
+      }
 
       if (!key) {
-        throw new Error('No public key returned')
+        throw new Error('Could not retrieve wallet address')
       }
 
       setPublicKey(key)
       setStatus('connected')
     } catch (err) {
-      const msg = err.message || ''
-      console.error('Wallet connection error:', msg)
+      const msg = String(err.message || err).toLowerCase()
+      console.error('Wallet connection error:', err)
 
       if (
         msg.includes('not found') ||
         msg.includes('install') ||
-        msg.includes('not installed')
+        msg.includes('not installed') ||
+        msg.includes('extension')
       ) {
         setError({
           code: 'WALLET_NOT_FOUND',
-          message: 'Wallet extension not found. Please install it.',
+          message: 'Wallet not found. Please install Freighter or select another wallet.',
         })
-      } else if (msg.includes('rejected') || msg.includes('denied')) {
+      } else if (msg.includes('rejected') || msg.includes('denied') || msg.includes('user')) {
         setError({
           code: 'REJECTED',
-          message: 'Connection rejected. Please approve in your wallet.',
+          message: 'Connection was rejected. Please try again and approve the request.',
         })
       } else if (msg.includes('network') || msg.includes('testnet')) {
         setError({
           code: 'NETWORK_MISMATCH',
-          message: 'Please set your wallet to Stellar Testnet.',
+          message: 'Wrong network. Please switch your wallet to Stellar Testnet.',
         })
       } else {
         setError({
           code: 'UNKNOWN',
-          message: msg || 'Connection failed. Please try again.',
+          message: msg || 'Failed to connect wallet. Please try again.',
         })
       }
 
@@ -87,20 +97,22 @@ export function useWalletKit() {
     }
 
     try {
-      const k = getKit()
-      const { signedTxXdr } = await k.signTransaction(xdr, {
+      const kit = initializeKit()
+      const signResult = await kit.signTransaction(xdr, {
         network: WalletNetwork.TESTNET,
         networkPassphrase: 'Test SDF Network ; September 2015',
       })
 
-      if (!signedTxXdr) {
-        throw new Error('No signed transaction returned')
+      const signedXdr = signResult?.signedTxXdr || signResult?.xdr || signResult
+
+      if (!signedXdr) {
+        throw new Error('Transaction signing failed')
       }
 
-      return signedTxXdr
+      return signedXdr
     } catch (err) {
-      const msg = err.message || ''
-      if (msg.includes('rejected') || msg.includes('denied')) {
+      const msg = String(err.message || err).toLowerCase()
+      if (msg.includes('rejected') || msg.includes('denied') || msg.includes('user')) {
         throw new Error('REJECTED')
       }
       throw err
