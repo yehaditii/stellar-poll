@@ -58,6 +58,23 @@ Handles minimum 3 error types with user-friendly messages:
 - **Smart Contract**: Soroban (Rust)
 - **Network**: Stellar Testnet
 
+## Screenshots
+
+### Wallet Connection UI
+![Wallet Connection](./public/screenshots/wallet-ui.png)
+
+Connect your Stellar wallet using multi-wallet support. Freighter, xBull, and Albedo are supported with seamless connection flow.
+
+### Live Voting Interface
+![Voting Interface](./public/screenshots/voting-ui.png)
+
+Cast your vote on-chain with real-time transaction status tracking. Select an option and submit your vote to the Stellar blockchain.
+
+### Live Results Display
+![Real-Time Results](./public/screenshots/results-ui.png)
+
+View live voting results with percentage bars and vote counts. Results update automatically every 5 seconds from the blockchain.
+
 ## Installation & Setup
 
 ### Prerequisites

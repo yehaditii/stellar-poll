@@ -59,6 +59,10 @@ export default function PollCard({ publicKey, sign }) {
     }
   }
 
+  const handleRefresh = async () => {
+    await fetchData()
+  }
+
   if (loading) return (
     <div style={{ textAlign: 'center', padding: 60, color: '#444' }}>
       <div style={{ fontSize: 24, marginBottom: 12, fontWeight: 700 }}>Loading</div>
@@ -69,13 +73,35 @@ export default function PollCard({ publicKey, sign }) {
   return (
     <div style={{ maxWidth: 560, margin: '0 auto' }} className="fade-up">
       {/* Question */}
-      <div style={{ background: '#0d0d20', border: '1px solid #2a2a4a', borderRadius: 20, padding: '28px 32px', marginBottom: 16 }}>
+      <div style={{ background: '#0d0d20', border: '1px solid #2a2a4a', borderRadius: 20, padding: '28px 32px', marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
           <span className="live-dot" style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }}></span>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#22c55e' }}>LIVE ON-CHAIN</span>
           <span style={{ fontSize: 11, color: '#444', marginLeft: 'auto' }} className="mono">{totalVotes} total votes</span>
         </div>
-        <h2 style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.3 }}>{POLL_QUESTION}</h2>
+        <h2 style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.3, marginBottom: 4 }}>{POLL_QUESTION}</h2>
+      </div>
+
+      {/* Results Heading */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: '#e8e8f0' }}>Live Voting Results</h3>
+        <button onClick={handleRefresh}
+          style={{
+            background: 'transparent',
+            border: '1px solid #2a2a4a',
+            color: '#6366f1',
+            borderRadius: 8,
+            padding: '6px 12px',
+            cursor: 'pointer',
+            fontSize: 12,
+            fontWeight: 600,
+            transition: 'all 0.2s',
+            fontFamily: 'Space Grotesk, sans-serif'
+          }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.background = '#6366f10a' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a4a'; e.currentTarget.style.background = 'transparent' }}>
+          Refresh Results
+        </button>
       </div>
 
       {/* Options */}
@@ -91,9 +117,9 @@ export default function PollCard({ publicKey, sign }) {
               disabled={hasVoted}
               style={{
                 background: isSelected ? '#13133a' : '#0d0d20',
-                border: `1px solid ${isSelected ? '#6366f1' : isWinner ? '#22c55e40' : '#2a2a4a'}`,
+                border: `1px solid ${isSelected ? '#6366f1' : isWinner ? '#22c55e60' : '#2a2a4a'}`,
                 borderRadius: 14,
-                padding: '18px 20px',
+                padding: '20px 22px',
                 cursor: hasVoted ? 'default' : 'pointer',
                 textAlign: 'left',
                 transition: 'all 0.2s',
@@ -105,7 +131,7 @@ export default function PollCard({ publicKey, sign }) {
                 <div style={{
                   position: 'absolute', left: 0, top: 0, bottom: 0,
                   width: pct + '%',
-                  background: isWinner ? '#22c55e15' : '#6366f115',
+                  background: isWinner ? '#22c55e20' : '#6366f120',
                   transition: 'width 0.8s ease',
                 }} />
               )}
@@ -115,8 +141,8 @@ export default function PollCard({ publicKey, sign }) {
                 </div>
                 {hasVoted && (
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontWeight: 700, fontSize: 18, color: isWinner ? '#22c55e' : '#e8e8f0', fontFamily: 'DM Mono, monospace' }}>{pct}%</div>
-                    <div style={{ fontSize: 11, color: '#555' }}>{votes[opt.index]} votes</div>
+                    <div style={{ fontWeight: 700, fontSize: 20, color: isWinner ? '#22c55e' : '#e8e8f0', fontFamily: 'DM Mono, monospace' }}>{pct}%</div>
+                    <div style={{ fontSize: 12, color: '#888' }}>{votes[opt.index]} votes</div>
                   </div>
                 )}
                 {!hasVoted && isSelected && (
