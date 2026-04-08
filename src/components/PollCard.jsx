@@ -50,9 +50,18 @@ export default function PollCard({ publicKey, sign }) {
       setTxHash(result.hash)
       setTxStatus(TX_STATUS.SUCCESS)
       setHasVoted(true)
-      setTimeout(() => fetchData(), 2000)
+      
+      // Refetch data after a delay to ensure blockchain confirmation
+      setTimeout(async () => {
+        console.log('Refetching data after vote...')
+        const counts = await getVotes()
+        setVotes(counts)
+        console.log('Updated votes:', counts)
+      }, 3000)
     } catch (err) {
       const msg = String(err.message || err).toLowerCase()
+      console.error('Vote error:', msg)
+      
       if (msg.includes('already')) {
         setTxError({ code: 'ALREADY_VOTED', message: 'You have already voted with this wallet.' })
       } else if (msg.includes('rejected') || msg.includes('user')) {

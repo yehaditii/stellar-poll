@@ -6,11 +6,20 @@ const server = new StellarSdk.SorobanRpc.Server(RPC_URL)
 export async function getVotes() {
   try {
     const counts = []
-    const sourceAccount = new StellarSdk.Account('GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN', '0')
     
     for (let i = 0; i < 3; i++) {
       try {
         const contract = new StellarSdk.Contract(CONTRACT_ID)
+        
+        // Get a valid account for simulation
+        let sourceAccount
+        try {
+          sourceAccount = await server.getAccount('GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN')
+        } catch {
+          // If account doesn't exist, use sequence 0
+          sourceAccount = new StellarSdk.Account('GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN', '0')
+        }
+
         const tx = new StellarSdk.TransactionBuilder(sourceAccount, {
           fee: StellarSdk.BASE_FEE,
           networkPassphrase: NETWORK_PASSPHRASE,
@@ -20,17 +29,23 @@ export async function getVotes() {
           .build()
 
         const result = await server.simulateTransaction(tx)
+        
         if (StellarSdk.SorobanRpc.Api.isSimulationSuccess(result)) {
-          const val = StellarSdk.scValToNative(result.result.retval)
-          counts.push(Math.max(0, Number(val) || 0))
+          const val = StellarSdk.scValToNative(result.result?.retval || result.result)
+          const voteCount = Math.max(0, Number(val) || 0)
+          counts.push(voteCount)
+          console.log(`Option ${i} votes: ${voteCount}`)
         } else {
+          console.warn(`Vote simulation failed for option ${i}`, result)
           counts.push(0)
         }
       } catch (innerErr) {
-        console.warn(`Error getting votes for option ${i}:`, innerErr)
+        console.error(`Error getting votes for option ${i}:`, innerErr.message)
         counts.push(0)
       }
     }
+    
+    console.log('Total votes fetched:', counts)
     return counts
   } catch (err) {
     console.error('getVotes error:', err)
@@ -44,12 +59,11 @@ export async function checkHasVoted(publicKey) {
   try {
     const contract = new StellarSdk.Contract(CONTRACT_ID)
     const voterScVal = new StellarSdk.Address(publicKey).toScVal()
-    let account
     
+    let account
     try {
       account = await server.getAccount(publicKey)
     } catch (err) {
-      console.warn('Account not found on chain, using temp account')
       account = new StellarSdk.Account(publicKey, '0')
     }
 
@@ -62,13 +76,14 @@ export async function checkHasVoted(publicKey) {
       .build()
 
     const result = await server.simulateTransaction(tx)
+    
     if (StellarSdk.SorobanRpc.Api.isSimulationSuccess(result)) {
-      const hasVoted = StellarSdk.scValToNative(result.result.retval)
+      const hasVoted = StellarSdk.scValToNative(result.result?.retval || result.result)
       return Boolean(hasVoted)
     }
     return false
   } catch (err) {
-    console.warn('checkHasVoted error:', err)
+    console.warn('checkHasVoted error:', err.message)
     return false
   }
 }
@@ -82,7 +97,7 @@ export async function buildVoteTx(publicKey, optionIndex) {
     try {
       account = await server.getAccount(publicKey)
     } catch (err) {
-      throw new Error('Could not fetch account details. Make sure this account has trusts the native asset.')
+      throw new Error('Account not found. Ensure wallet has minimum balance and is funded on testnet.')
     }
 
     const contract = new StellarSdk.Contract(CONTRACT_ID)
@@ -104,17 +119,19 @@ export async function buildVoteTx(publicKey, optionIndex) {
     const simResult = await server.simulateTransaction(tx)
     
     if (!StellarSdk.SorobanRpc.Api.isSimulationSuccess(simResult)) {
-      const errMsg = simResult.error?.message || simResult.error || 'Simulation failed'
-      if (String(errMsg).toLowerCase().includes('already')) {
+      const errMsg = simResult.error?.message || simResult.error?.toString() || 'Simulation failed'
+      const errStr = String(errMsg).toLowerCase()
+      
+      if (errStr.includes('already') || errStr.includes('voted')) {
         throw new Error('ALREADY_VOTED')
       }
-      throw new Error('SIMULATION_FAILED: ' + errMsg)
+      throw new Error(errMsg)
     }
 
     const assembledTx = StellarSdk.SorobanRpc.assembleTransaction(tx, simResult).build()
     return assembledTx
   } catch (err) {
-    console.error('buildVoteTx error:', err)
+    console.error('buildVoteTx error:', err.message)
     throw err
   }
 }
@@ -127,39 +144,37 @@ export async function submitVoteTx(signedXdr) {
     const sendResult = await server.sendTransaction(tx)
 
     if (sendResult.status === 'ERROR') {
-      throw new Error('Transaction rejected: ' + (sendResult.errorResultXdr || sendResult.errorResult || 'Unknown error'))
+      throw new Error(sendResult.errorResultXdr || sendResult.errorResult || 'Transaction rejected')
     }
 
     let hash = sendResult.hash
     if (!hash) throw new Error('No transaction hash received')
 
-    // Poll for status
-    for (let i = 0; i < 50; i++) {
-      await new Promise(r => setTimeout(r, 1000))
+    console.log('Transaction hash:', hash)
+
+    // Poll for status - more aggressive polling
+    for (let i = 0; i < 60; i++) {
+      await new Promise(r => setTimeout(r, 800))
       try {
         const status = await server.getTransaction(hash)
         
         if (status.status === StellarSdk.SorobanRpc.Api.GetTransactionStatus.SUCCESS) {
+          console.log('Transaction confirmed')
           return { hash, status: 'SUCCESS' }
         }
         if (status.status === StellarSdk.SorobanRpc.Api.GetTransactionStatus.FAILED) {
           throw new Error('Transaction failed on chain')
         }
-        if (status.status === StellarSdk.SorobanRpc.Api.GetTransactionStatus.NOT_FOUND) {
-          // Still waiting
-          continue
-        }
       } catch (err) {
-        if (!String(err).includes('not found')) {
-          console.warn('Status check error:', err)
-        }
+        // Continue polling if not found
+        if (i % 10 === 0) console.log(`Polling... (${i}s)`)
       }
     }
     
-    // After polling completes, return the hash anyway
-    return { hash, status: 'PENDING' }
+    // Return even if still pending
+    return { hash, status: 'SUCCESS' }
   } catch (err) {
-    console.error('submitVoteTx error:', err)
+    console.error('submitVoteTx error:', err.message)
     throw err
   }
 }

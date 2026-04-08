@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback } from 'react'
 import {
   StellarWalletsKit,
   WalletNetwork,
@@ -8,17 +8,17 @@ import {
   allowAllModules,
 } from '@creit.tech/stellar-wallets-kit'
 
-const kitRef = { current: null }
+let kit = null
 
-function initializeKit() {
-  if (!kitRef.current) {
-    kitRef.current = new StellarWalletsKit({
+function getKit() {
+  if (!kit) {
+    kit = new StellarWalletsKit({
       network: WalletNetwork.TESTNET,
       selectedWalletId: FREIGHTER_ID,
       modules: allowAllModules(),
     })
   }
-  return kitRef.current
+  return kit
 }
 
 export function useWalletKit() {
@@ -31,25 +31,51 @@ export function useWalletKit() {
     setError(null)
 
     try {
-      const kit = initializeKit()
-      await kit.setWallet(walletId)
+      const k = getKit()
       
-      // Get wallet public key
-      let key
+      // Set the selected wallet
+      await k.setWallet(walletId)
+      console.log('Wallet set to:', walletId)
+
+      // Try to get the public key
+      let key = null
+      
       try {
-        key = await kit.getAddress()
-      } catch (err) {
-        console.warn('getAddress not available, trying alternative...')
-        const pubKeyObj = await kit.getPublicKey()
-        key = pubKeyObj?.publicKey || pubKeyObj
+        // Try the standard method first
+        if (typeof k.getAddress === 'function') {
+          key = await k.getAddress()
+          console.log('Got address via getAddress:', key)
+        } else if (typeof k.getPublicKey === 'function') {
+          const pubKeyObj = await k.getPublicKey()
+          key = pubKeyObj?.publicKey || pubKeyObj
+          console.log('Got address via getPublicKey:', key)
+        } else {
+          throw new Error('No address retrieval method available')
+        }
+      } catch (addressErr) {
+        console.warn('Standard method failed:', addressErr.message)
+        // Try alternative methods
+        try {
+          const pubKeyObj = await k.getPublicKey()
+          key = pubKeyObj?.publicKey || pubKeyObj
+        } catch {
+          console.error('All address retrieval methods failed')
+        }
       }
 
-      if (!key) {
-        throw new Error('Could not retrieve wallet address')
+      // Validate we got a key
+      if (!key || typeof key !== 'string' || key.length === 0) {
+        throw new Error('Failed to retrieve valid wallet address')
+      }
+
+      // Validate it's a Stellar address
+      if (!key.startsWith('G')) {
+        throw new Error('Invalid Stellar address format')
       }
 
       setPublicKey(key)
       setStatus('connected')
+      console.log('Successfully connected wallet:', key.slice(0, 6) + '...')
     } catch (err) {
       const msg = String(err.message || err).toLowerCase()
       console.error('Wallet connection error:', err)
@@ -62,17 +88,22 @@ export function useWalletKit() {
       ) {
         setError({
           code: 'WALLET_NOT_FOUND',
-          message: 'Wallet not found. Please install Freighter or select another wallet.',
+          message: 'Wallet not found. Please install Freighter, xBull, or Albedo.',
         })
       } else if (msg.includes('rejected') || msg.includes('denied') || msg.includes('user')) {
         setError({
           code: 'REJECTED',
-          message: 'Connection was rejected. Please try again and approve the request.',
+          message: 'Connection rejected. Please approve the request in your wallet.',
         })
       } else if (msg.includes('network') || msg.includes('testnet')) {
         setError({
           code: 'NETWORK_MISMATCH',
-          message: 'Wrong network. Please switch your wallet to Stellar Testnet.',
+          message: 'Wrong network. Switch your wallet to Stellar Testnet.',
+        })
+      } else if (msg.includes('address') || msg.includes('public key')) {
+        setError({
+          code: 'NO_KEY',
+          message: 'Could not retrieve wallet address. Try again or switch wallets.',
         })
       } else {
         setError({
@@ -97,16 +128,29 @@ export function useWalletKit() {
     }
 
     try {
-      const kit = initializeKit()
-      const signResult = await kit.signTransaction(xdr, {
+      const k = getKit()
+      
+      // Sign the transaction
+      const signResult = await k.signTransaction(xdr, {
         network: WalletNetwork.TESTNET,
         networkPassphrase: 'Test SDF Network ; September 2015',
       })
 
-      const signedXdr = signResult?.signedTxXdr || signResult?.xdr || signResult
+      // Handle different response formats
+      let signedXdr = null
+      if (typeof signResult === 'string') {
+        signedXdr = signResult
+      } else if (signResult?.signedTxXdr) {
+        signedXdr = signResult.signedTxXdr
+      } else if (signResult?.xdr) {
+        signedXdr = signResult.xdr
+      } else if (signResult?.["signed_envelope_xdr"]) {
+        signedXdr = signResult["signed_envelope_xdr"]
+      }
 
       if (!signedXdr) {
-        throw new Error('Transaction signing failed')
+        console.error('Sign result:', signResult)
+        throw new Error('Failed to sign transaction')
       }
 
       return signedXdr
