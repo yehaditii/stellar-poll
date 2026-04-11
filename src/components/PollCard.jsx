@@ -18,14 +18,29 @@ export default function PollCard({ publicKey, sign }) {
 
   const fetchData = async () => {
     try {
-      const counts = await getVotes()
+      console.log('[fetchData] Starting vote fetch...')
+      
+      // Fetch votes for each option individually
+      const v0 = await getVotes(0)
+      const v1 = await getVotes(1)
+      const v2 = await getVotes(2)
+      
+      console.log('[fetchData] Raw votes:', v0, v1, v2)
+      
+      const counts = [v0, v1, v2]
+      const total = v0 + v1 + v2
+      
+      console.log(`[fetchData] 📊 TOTAL: [${counts.join(', ')}] = ${total} votes`)
+      
       setVotes(counts)
+      
       if (publicKey) {
         const voted = await checkHasVoted(publicKey)
+        console.log('[fetchData] Has voted:', voted)
         setHasVoted(voted)
       }
     } catch (err) {
-      console.error('Error fetching data:', err)
+      console.error('[fetchData] Error:', err)
     } finally {
       setLoading(false)
     }
@@ -38,29 +53,51 @@ export default function PollCard({ publicKey, sign }) {
   }, [publicKey])
 
   const handleVote = async () => {
-    if (selected === null || hasVoted || !publicKey) return
+    if (selected === null || hasVoted || !publicKey) {
+      console.log('Vote blocked - selected:', selected, 'hasVoted:', hasVoted, 'publicKey:', publicKey)
+      return
+    }
+    
+    console.log('Starting vote for option:', selected, 'user:', publicKey)
     setTxStatus(TX_STATUS.PENDING)
     setTxError(null)
     setTxHash(null)
 
     try {
+      console.log('Building transaction for option', selected)
       const tx = await buildVoteTx(publicKey, selected)
+      console.log('Transaction built successfully')
+      
+      console.log('Requesting wallet signature')
       const signedXdr = await sign(tx.toXDR())
+      console.log('Transaction signed, submitting to chain')
+      
       const result = await submitVoteTx(signedXdr)
+      console.log('Transaction confirmed with hash:', result.hash)
+      
       setTxHash(result.hash)
       setTxStatus(TX_STATUS.SUCCESS)
       setHasVoted(true)
+      setSelected(null)  // CRITICAL: Reset selected option after successful vote
       
       // Refetch data after a delay to ensure blockchain confirmation
       setTimeout(async () => {
-        console.log('Refetching data after vote...')
-        const counts = await getVotes()
-        setVotes(counts)
-        console.log('Updated votes:', counts)
-      }, 3000)
+        console.log('[handleVote] Refetching votes 2s after confirmation...')
+        try {
+          const v0 = await getVotes(0)
+          const v1 = await getVotes(1)
+          const v2 = await getVotes(2)
+          const counts = [v0, v1, v2]
+          const total = counts.reduce((a, b) => a + b, 0)
+          console.log(`[handleVote] Updated votes: [${counts.join(', ')}] = ${total} total`)
+          setVotes(counts)
+        } catch(refetchErr) {
+          console.error('[handleVote] Error refetching votes:', refetchErr)
+        }
+      }, 2000)
     } catch (err) {
       const msg = String(err.message || err).toLowerCase()
-      console.error('Vote error:', msg)
+      console.error('Vote error:', err.message)
       
       if (msg.includes('already')) {
         setTxError({ code: 'ALREADY_VOTED', message: 'You have already voted with this wallet.' })
@@ -68,10 +105,13 @@ export default function PollCard({ publicKey, sign }) {
         setTxError({ code: 'REJECTED', message: 'Transaction rejected. Please approve in your wallet.' })
       } else if (msg.includes('insufficient') || msg.includes('balance')) {
         setTxError({ code: 'INSUFFICIENT_BALANCE', message: 'Insufficient XLM balance for transaction fees.' })
+      } else if (msg.includes('confirmation') || msg.includes('timeout')) {
+        setTxError({ code: 'TIMEOUT', message: 'Transaction took too long to confirm. Check Stellar Expert for status.' })
       } else {
         setTxError({ code: 'UNKNOWN', message: msg || 'Transaction failed. Please try again.' })
       }
       setTxStatus(TX_STATUS.ERROR)
+      setSelected(null)  // Reset on error too
     }
   }
 

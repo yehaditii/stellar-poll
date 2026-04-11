@@ -3,53 +3,66 @@ import { CONTRACT_ID, NETWORK_PASSPHRASE, RPC_URL } from '../constants'
 
 const server = new StellarSdk.SorobanRpc.Server(RPC_URL)
 
-export async function getVotes() {
+// Fetch votes for a specific option (0, 1, or 2)
+export async function getVotes(optionIndex) {
   try {
-    const counts = []
+    console.log(`[getVotes] Fetching votes for option ${optionIndex}`)
     
-    for (let i = 0; i < 3; i++) {
-      try {
-        const contract = new StellarSdk.Contract(CONTRACT_ID)
-        
-        // Get a valid account for simulation
-        let sourceAccount
-        try {
-          sourceAccount = await server.getAccount('GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN')
-        } catch {
-          // If account doesn't exist, use sequence 0
-          sourceAccount = new StellarSdk.Account('GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN', '0')
-        }
-
-        const tx = new StellarSdk.TransactionBuilder(sourceAccount, {
-          fee: StellarSdk.BASE_FEE,
-          networkPassphrase: NETWORK_PASSPHRASE,
-        })
-          .addOperation(contract.call('get_votes', StellarSdk.nativeToScVal(i, { type: 'u32' })))
-          .setTimeout(30)
-          .build()
-
-        const result = await server.simulateTransaction(tx)
-        
-        if (StellarSdk.SorobanRpc.Api.isSimulationSuccess(result)) {
-          const val = StellarSdk.scValToNative(result.result?.retval || result.result)
-          const voteCount = Math.max(0, Number(val) || 0)
-          counts.push(voteCount)
-          console.log(`Option ${i} votes: ${voteCount}`)
-        } else {
-          console.warn(`Vote simulation failed for option ${i}`, result)
-          counts.push(0)
-        }
-      } catch (innerErr) {
-        console.error(`Error getting votes for option ${i}:`, innerErr.message)
-        counts.push(0)
-      }
+    const contract = new StellarSdk.Contract(CONTRACT_ID)
+    
+    // Get a valid account for simulation
+    let sourceAccount
+    try {
+      sourceAccount = await server.getAccount('GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN')
+    } catch {
+      sourceAccount = new StellarSdk.Account('GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN', '0')
     }
+
+    const tx = new StellarSdk.TransactionBuilder(sourceAccount, {
+      fee: StellarSdk.BASE_FEE,
+      networkPassphrase: NETWORK_PASSPHRASE,
+    })
+      .addOperation(contract.call('get_votes', StellarSdk.nativeToScVal(optionIndex, { type: 'u32' })))
+      .setTimeout(30)
+      .build()
+
+    const result = await server.simulateTransaction(tx)
     
-    console.log('Total votes fetched:', counts)
-    return counts
+    if (StellarSdk.SorobanRpc.Api.isSimulationSuccess(result)) {
+      // Extract the return value
+      const retval = result.result?.retval
+      console.log(`[getVotes] Raw retval for option ${optionIndex}:`, retval)
+      
+      if (!retval) {
+        console.warn(`[getVotes] No retval for option ${optionIndex}`)
+        return 0
+      }
+      
+      // Convert Soroban value to native JavaScript
+      const nativeVal = StellarSdk.scValToNative(retval)
+      console.log(`[getVotes] Native value for option ${optionIndex}:`, nativeVal, `(type: ${typeof nativeVal})`)
+      
+      // Handle various types: number, string, BigInt
+      let voteCount = 0
+      if (typeof nativeVal === 'number') {
+        voteCount = Math.max(0, nativeVal)
+      } else if (typeof nativeVal === 'string') {
+        voteCount = Math.max(0, parseInt(nativeVal, 10) || 0)
+      } else if (typeof nativeVal === 'bigint') {
+        voteCount = Math.max(0, Number(nativeVal))
+      } else if (nativeVal !== null && nativeVal !== undefined) {
+        voteCount = Math.max(0, Number(nativeVal) || 0)
+      }
+      
+      console.log(`[getVotes] ✓ Option ${optionIndex}: ${voteCount} votes`)
+      return voteCount
+    } else {
+      console.error(`[getVotes] ✗ Simulation failed for option ${optionIndex}:`, result.error)
+      return 0
+    }
   } catch (err) {
-    console.error('getVotes error:', err)
-    return [0, 0, 0]
+    console.error(`[getVotes] ERROR for option ${optionIndex}:`, err.message)
+    return 0
   }
 }
 
@@ -151,27 +164,36 @@ export async function submitVoteTx(signedXdr) {
     if (!hash) throw new Error('No transaction hash received')
 
     console.log('Transaction hash:', hash)
+    console.log('Transaction submitted to Soroban RPC')
 
-    // Poll for status - more aggressive polling
+    // Poll for actual confirmation - ONLY return SUCCESS when truly confirmed
+    let confirmed = false
     for (let i = 0; i < 60; i++) {
       await new Promise(r => setTimeout(r, 800))
       try {
         const status = await server.getTransaction(hash)
+        console.log(`Poll ${i + 1}/60: Status = ${status.status}`)
         
         if (status.status === StellarSdk.SorobanRpc.Api.GetTransactionStatus.SUCCESS) {
-          console.log('Transaction confirmed')
-          return { hash, status: 'SUCCESS' }
+          console.log('Transaction CONFIRMED on-chain')
+          confirmed = true
+          break
         }
         if (status.status === StellarSdk.SorobanRpc.Api.GetTransactionStatus.FAILED) {
           throw new Error('Transaction failed on chain')
         }
       } catch (err) {
         // Continue polling if not found
-        if (i % 10 === 0) console.log(`Polling... (${i}s)`)
+        if (i % 10 === 0) console.log(`Polling... (${Math.round(i * 0.8)}s elapsed)`)
       }
     }
     
-    // Return even if still pending
+    // CRITICAL: Only succeed if actually confirmed
+    if (!confirmed) {
+      console.warn('Transaction not confirmed after 48s - may still succeed')
+      throw new Error('Transaction confirmation timeout - please check Stellar Expert')
+    }
+    
     return { hash, status: 'SUCCESS' }
   } catch (err) {
     console.error('submitVoteTx error:', err.message)

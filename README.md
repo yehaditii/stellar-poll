@@ -1,53 +1,58 @@
-# StellarPoll - Decentralized On-Chain Voting
+# Stellar Poll dApp
 
-**A production-ready Web3 dApp for secure, real-time voting on the Stellar Blockchain using Soroban smart contracts.**
-
-[![Status](https://img.shields.io/badge/status-production--ready-brightgreen)](https://github.com/yehaditii/stellar-poll)
-[![Network](https://img.shields.io/badge/network-Stellar%20Testnet-blue)](https://stellar.org)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-
-## Overview
-
-**StellarPoll** is a decentralized voting application that brings transparent, verifiable voting to the blockchain. Every vote is recorded directly in a Soroban smart contract on Stellar, providing immutable proof of participation and real-time vote tracking.
-
-### Key Capabilities
-- Multi-wallet support (Freighter, xBull, Albedo)
-- Real-time vote tallying and percentage calculations
-- Live results updating every 5 seconds
-- Transaction verification on Stellar Expert explorer
-- Comprehensive error handling and user feedback
-- No emojis - professional, clean ui
-- Fully responsive design
+A decentralized voting application built using Stellar Soroban smart contracts with real-time results and multi-wallet support.
 
 ## Features
 
-### Wallets
-- **Freighter** - Most popular, recommended
-- **xBull** - Feature-rich alternative
-- **Albedo** - Web-based, no extension needed
+- Multi-wallet support (Freighter, xBull, Albedo)
+- On-chain voting using Soroban smart contracts
+- Real-time vote updates
+- Transaction status tracking (pending/success/failure)
+- Error handling for wallet issues
 
-### Smart Contract Integration
-- ✓ Initialize voting poll
-- ✓ Cast vote with duplicate prevention
-- ✓ Fetch live vote counts
-- ✓ Check if address has voted
+## Screenshots
 
-### User Experience
-- ✓ One-click wallet connection
-- ✓ Real-time vote count updates
-- ✓ Transaction status tracking (pending/success/error)
-- ✓ Explorer integration for verification
-- ✓ Responsive mobile-friendly design
-- ✓ Smooth animations and transitions
+### Wallet Connection
+![Wallet Connect](./public/screenshots/wallet-connect.png)
 
-### Error Handling
-- Wallet not installed/found
-- Connection rejected/denied
-- Wrong network (Testnet validation)
-- Insufficient XLM balance
-- Duplicate votes prevented
-- Account not found on chain
-- Transaction timeouts
+### Wallet Options
+![Wallet Options](./public/screenshots/wallet-options.png)
+
+### Voting Interface
+![Voting UI](./public/screenshots/voting-ui.png)
+
+### Voting Results
+![Results](./public/screenshots/voting-results.png)
+
+### Transaction Success
+![Transaction](./public/screenshots/transaction-success.jpeg)
+
+## Contract Details
+
+- Network: Stellar Testnet
+- Contract ID: CAG4QMPN24NK4ZW7OCNVYLKKQL6H373Z5ZFSNRFO6B4SJXVXJH7PYQWE
+
+## Setup Instructions
+
+1. Clone the repository
+2. Run:
+   ```
+   npm install
+   ```
+3. Start development server:
+   ```
+   npm run dev
+   ```
+
+## Deployment
+
+This project is ready to be deployed on Vercel.
+
+## Tech Stack
+
+- React (Vite)
+- Stellar Soroban SDK
+- Stellar Wallets Kit
 
 ## Quick Start
 
