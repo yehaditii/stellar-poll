@@ -33,7 +33,10 @@ A decentralized voting application built using Stellar Soroban smart contracts w
 ## Contract Details
 
 - Network: Stellar Testnet
-- Contract ID: CAG4QMPN24NK4ZW7OCNVYLKKQL6H373Z5ZFSNRFO6B4SJXVXJH7PYQWE
+- Contract ID: CBOPFB6QFLO2WF3ITV3KTDBIGESZAQIORECFWQNOP2TT55OYEEZH5C62
+- Transaction Hash (create_poll): `49a17dca0a5ae729ab3a0a48a578d7484f1954de82eae2140016e0721d1cd44d`
+- [View contract on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CBOPFB6QFLO2WF3ITV3KTDBIGESZAQIORECFWQNOP2TT55OYEEZH5C62)
+- [View create_poll transaction on Stellar Expert](https://stellar.expert/explorer/testnet/tx/49a17dca0a5ae729ab3a0a48a578d7484f1954de82eae2140016e0721d1cd44d)
 
 ## Setup Instructions
 
@@ -120,7 +123,7 @@ Output files are in `dist/` directory, ready for deployment.
 
 ### Contract ID (Testnet)
 ```
-CAG4QMPN24NK4ZW7OCNVYLKKQL6H373Z5ZFSNRFO6B4SJXVXJH7PYQWE
+CBOPFB6QFLO2WF3ITV3KTDBIGESZAQIORECFWQNOP2TT55OYEEZH5C62
 ```
 
 ### Smart Contract Functions

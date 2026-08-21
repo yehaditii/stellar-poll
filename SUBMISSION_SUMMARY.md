@@ -28,7 +28,7 @@
 
 ### ✅ Smart Contract Integration
 - [x] Contract deployed on testnet
-- [x] Contract ID integrated: `CAG4QMPN24NK4ZW7OCNVYLKKQL6H373Z5ZFSNRFO6B4SJXVXJH7PYQWE`
+- [x] Contract ID integrated: `CBOPFB6QFLO2WF3ITV3KTDBIGESZAQIORECFWQNOP2TT55OYEEZH5C62`
 - [x] `initialize()` function callable
 - [x] `vote(voter, option_index)` function works
 - [x] `get_votes(option_index)` returns vote counts
@@ -183,7 +183,7 @@ DEPLOYMENT.md                # Deployment guide
 
 ### Contract ID
 ```
-CAG4QMPN24NK4ZW7OCNVYLKKQL6H373Z5ZFSNRFO6B4SJXVXJH7PYQWE
+CBOPFB6QFLO2WF3ITV3KTDBIGESZAQIORECFWQNOP2TT55OYEEZH5C62
 ```
 
 ### Network
@@ -310,7 +310,7 @@ https://github.com/yehaditii/stellar-poll
 
 ### Requirement 3: Contract Deployed
 ✅ Contract on Stellar Testnet
-- ID: CAG4QMPN24NK4ZW7OCNVYLKKQL6H373Z5ZFSNRFO6B4SJXVXJH7PYQWE
+- ID: CBOPFB6QFLO2WF3ITV3KTDBIGESZAQIORECFWQNOP2TT55OYEEZH5C62
 - Functions: initialize, vote, get_votes, has_voted
 
 ### Requirement 4: Contract Calls

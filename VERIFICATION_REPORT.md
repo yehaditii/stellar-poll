@@ -22,7 +22,7 @@
 ### 2. Smart Contract
 - ✅ poll-contract/src/lib.rs - Soroban contract code
 - ✅ Deployed on testnet
-- ✅ Contract ID: CAG4QMPN24NK4ZW7OCNVYLKKQL6H373Z5ZFSNRFO6B4SJXVXJH7PYQWE
+- ✅ Contract ID: CBOPFB6QFLO2WF3ITV3KTDBIGESZAQIORECFWQNOP2TT55OYEEZH5C62
 - ✅ All 4 functions implemented and working
 
 ### 3. Documentation
