@@ -27,6 +27,9 @@ A decentralized voting application built using Stellar Soroban smart contracts w
 ### Transaction Success
 ![Transaction](./public/screenshots/transaction-success.jpeg)
 
+### Mobile responsive
+![Mobile UI](./public/screenshots/Mobile-UI.jpeg)
+
 ## Contract Details
 
 - Network: Stellar Testnet
