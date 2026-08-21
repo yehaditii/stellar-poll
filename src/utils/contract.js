@@ -13,9 +13,9 @@ export async function getVotes(optionIndex) {
     // Get a valid account for simulation
     let sourceAccount
     try {
-      sourceAccount = await server.getAccount('GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN')
+      sourceAccount = await server.getAccount('GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF')
     } catch {
-      sourceAccount = new StellarSdk.Account('GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN', '0')
+      sourceAccount = new StellarSdk.Account('GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF', '0')
     }
 
     const tx = new StellarSdk.TransactionBuilder(sourceAccount, {
