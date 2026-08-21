@@ -86,3 +86,95 @@ impl PollContract {
             .unwrap_or(false)
     }
 }
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    use soroban_sdk::{
+        testutils::Address as _,
+        Address,
+    };
+
+    fn setup() -> (Env, PollContractClient<'static>, Address) {
+        let env = Env::default();
+
+        let contract_id = env.register_contract(None, PollContract);
+        let client = PollContractClient::new(&env, &contract_id);
+
+        let voter = Address::generate(&env);
+
+        (env, client, voter)
+    }
+
+    #[test]
+    fn test_initialize() {
+        let (env, client, _) = setup();
+
+        client.initialize();
+
+        assert_eq!(client.get_votes(&0), 0);
+        assert_eq!(client.get_votes(&1), 0);
+        assert_eq!(client.get_votes(&2), 0);
+
+        assert_eq!(client.get_option(&0), Symbol::new(&env, "Stellar"));
+        assert_eq!(client.get_option(&1), Symbol::new(&env, "Ethereum"));
+        assert_eq!(client.get_option(&2), Symbol::new(&env, "Solana"));
+    }
+
+    #[test]
+    fn test_vote() {
+        let (env, client, voter) = setup();
+
+        client.initialize();
+
+        env.mock_all_auths();
+
+        client.vote(&voter, &0);
+
+        assert_eq!(client.get_votes(&0), 1);
+        assert!(client.has_voted(&voter));
+    }
+
+    #[test]
+    #[should_panic(expected = "already voted")]
+    fn test_duplicate_vote_rejected() {
+        let (env, client, voter) = setup();
+
+        client.initialize();
+
+        env.mock_all_auths();
+
+        client.vote(&voter, &0);
+        client.vote(&voter, &1);
+    }
+
+    #[test]
+    #[should_panic(expected = "invalid option")]
+    fn test_invalid_option_rejected() {
+        let (env, client, voter) = setup();
+
+        client.initialize();
+
+        env.mock_all_auths();
+
+        client.vote(&voter, &3);
+    }
+
+    #[test]
+    fn test_multiple_voters() {
+        let (env, client, voter1) = setup();
+
+        let voter2 = Address::generate(&env);
+
+        client.initialize();
+
+        env.mock_all_auths();
+
+        client.vote(&voter1, &0);
+        client.vote(&voter2, &0);
+
+        assert_eq!(client.get_votes(&0), 2);
+        assert!(client.has_voted(&voter1));
+        assert!(client.has_voted(&voter2));
+    }
+}
