@@ -16,16 +16,16 @@ export default function App() {
   const short = (k) => k ? k.slice(0, 6) + '...' + k.slice(-4) : ''
 
   return (
-    <div style={{ minHeight: '100vh', background: '#050510' }}>
+    <div className="app-shell" style={{ minHeight: '100vh', background: '#050510' }}>
       {/* Header */}
-      <header style={{ borderBottom: '1px solid #1a1a2e', padding: '16px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <header className="app-header" style={{ borderBottom: '1px solid #1a1a2e', padding: '16px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div className="brand-group" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 34, height: 34, background: '#6366f1', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#fff', fontSize: 18 }}>S</div>
           <span style={{ fontWeight: 800, fontSize: 20, letterSpacing: '-0.5px' }}>StellarPoll</span>
           <span style={{ background: '#6366f115', color: '#6366f1', fontSize: 10, fontWeight: 700, padding: '2px 10px', borderRadius: 99, border: '1px solid #6366f130', fontFamily: 'DM Mono, monospace' }}>TESTNET</span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className="wallet-actions" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {status === 'connected' ? (
             <>
               <div style={{ background: '#0d0d20', border: '1px solid #2a2a4a', borderRadius: 10, padding: '8px 14px', fontFamily: 'DM Mono, monospace', fontSize: 13, color: '#aaa' }}>
@@ -60,8 +60,8 @@ export default function App() {
       </header>
 
       {/* Main */}
-      <main style={{ maxWidth: 620, margin: '0 auto', padding: '60px 20px' }}>
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+      <main className="app-main" style={{ maxWidth: 620, margin: '0 auto', padding: '60px 20px' }}>
+        <div className="hero-copy" style={{ textAlign: 'center', marginBottom: 48 }}>
           <h1 style={{ fontSize: 38, fontWeight: 800, letterSpacing: '-1px', lineHeight: 1.2, marginBottom: 12 }}>
             Vote On-Chain.<br />
             <span style={{ background: 'linear-gradient(90deg, #6366f1, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>

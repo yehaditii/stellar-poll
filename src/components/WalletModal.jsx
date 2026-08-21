@@ -18,6 +18,7 @@ export default function WalletModal({ onConnect, onClose, error, status, walletO
       onClick={e => e.target === e.currentTarget && onClose()}
     >
       <div
+        className="wallet-modal"
         style={{
           background: '#0d0d20',
           border: '1px solid #2a2a4a',
@@ -28,9 +29,10 @@ export default function WalletModal({ onConnect, onClose, error, status, walletO
           animation: 'fadeUp 0.3s ease',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <div className="wallet-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h2 style={{ fontSize: 20, fontWeight: 700 }}>Connect Wallet</h2>
           <button
+            aria-label="Close wallet dialog"
             onClick={onClose}
             style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 20 }}
           >

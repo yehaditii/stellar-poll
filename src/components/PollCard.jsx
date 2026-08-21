@@ -13,6 +13,7 @@ export default function PollCard({ publicKey, sign }) {
   const [txHash, setTxHash] = useState(null)
   const [txError, setTxError] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [dataError, setDataError] = useState(null)
   const [copied, setCopied] = useState(false)
 
   const totalVotes = votes.reduce((a, b) => a + b, 0)
@@ -34,6 +35,7 @@ export default function PollCard({ publicKey, sign }) {
       console.log(`[fetchData] 📊 TOTAL: [${counts.join(', ')}] = ${total} votes`)
       
       setVotes(counts)
+      setDataError(null)
       
       if (publicKey) {
         const voted = await checkHasVoted(publicKey)
@@ -42,6 +44,7 @@ export default function PollCard({ publicKey, sign }) {
       }
     } catch (err) {
       console.error('[fetchData] Error:', err)
+      setDataError(err)
     } finally {
       setLoading(false)
     }
@@ -154,7 +157,13 @@ export default function PollCard({ publicKey, sign }) {
   )
 
   return (
-    <div style={{ maxWidth: 560, margin: '0 auto' }} className="fade-up">
+    <div className="poll-card fade-up" style={{ maxWidth: 560, margin: '0 auto' }}>
+      {dataError && (
+        <div className="data-error" role="alert">
+          <span>Could not load the latest poll results.</span>
+          <button onClick={handleRefresh} disabled={loading}>Retry</button>
+        </div>
+      )}
       {eventError && (
         <div style={{
           background: 'rgba(255, 170, 68, 0.1)',
@@ -170,7 +179,7 @@ export default function PollCard({ publicKey, sign }) {
       )}
 
       {/* Question Card */}
-      <div style={{
+      <div className="question-panel" style={{
         background: 'linear-gradient(135deg, #0d0d20 0%, #13132a 100%)',
         border: '1px solid #2a2a4a',
         borderRadius: 20,
@@ -194,7 +203,7 @@ export default function PollCard({ publicKey, sign }) {
       </div>
 
       {/* Results Heading */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+      <div className="results-heading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <div>
           <h3 style={{ fontSize: 16, fontWeight: 700, color: '#e8e8f0', marginBottom: 4 }}>Live Results</h3>
           <span style={{ fontSize: 11, color: eventStatus === 'listening' ? '#22c55e' : '#888' }}>
@@ -221,7 +230,7 @@ export default function PollCard({ publicKey, sign }) {
       </div>
 
       {/* Voting Options */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+      <div className="voting-options" style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
         {POLL_OPTIONS.map((opt, idx) => {
           const pct = totalVotes > 0 ? Math.round((votes[opt.index] / totalVotes) * 100) : 0
           const isSelected = selected === opt.index
