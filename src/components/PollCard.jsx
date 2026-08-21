@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { POLL_OPTIONS, POLL_QUESTION } from '../constants'
 import { getVotes, checkHasVoted, buildVoteTx, submitVoteTx } from '../utils/contract'
+import { useContractEvents } from '../hooks/useContractEvents'
 
 const TX_STATUS = { IDLE: 'idle', PENDING: 'pending', SUCCESS: 'success', ERROR: 'error' }
 
@@ -46,10 +47,16 @@ export default function PollCard({ publicKey, sign }) {
     }
   }
 
+  const handleContractEvent = (event) => {
+    if (event.type === 'vote' || event.type === 'poll_created' || event.type === 'poll_closed') {
+      fetchData()
+    }
+  }
+
+  const { status: eventStatus, error: eventError } = useContractEvents(handleContractEvent)
+
   useEffect(() => {
     fetchData()
-    const interval = setInterval(fetchData, 5000)
-    return () => clearInterval(interval)
   }, [publicKey])
 
   const handleVote = async () => {
@@ -148,6 +155,20 @@ export default function PollCard({ publicKey, sign }) {
 
   return (
     <div style={{ maxWidth: 560, margin: '0 auto' }} className="fade-up">
+      {eventError && (
+        <div style={{
+          background: 'rgba(255, 170, 68, 0.1)',
+          border: '1px solid rgba(255, 170, 68, 0.3)',
+          borderRadius: 10,
+          padding: '10px 14px',
+          marginBottom: 16,
+          color: '#ffbb77',
+          fontSize: 12,
+        }}>
+          Live updates are temporarily unavailable. Retrying automatically.
+        </div>
+      )}
+
       {/* Question Card */}
       <div style={{
         background: 'linear-gradient(135deg, #0d0d20 0%, #13132a 100%)',
@@ -174,7 +195,12 @@ export default function PollCard({ publicKey, sign }) {
 
       {/* Results Heading */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: '#e8e8f0' }}>Live Results</h3>
+        <div>
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: '#e8e8f0', marginBottom: 4 }}>Live Results</h3>
+          <span style={{ fontSize: 11, color: eventStatus === 'listening' ? '#22c55e' : '#888' }}>
+            {eventStatus === 'listening' ? 'Listening for updates' : 'Connecting to live updates...'}
+          </span>
+        </div>
         <button onClick={handleRefresh}
           style={{
             background: 'transparent',

@@ -1,7 +1,7 @@
 import * as StellarSdk from '@stellar/stellar-sdk'
 import { CONTRACT_ID, NETWORK_PASSPHRASE, RPC_URL } from '../constants'
 
-const server = new StellarSdk.SorobanRpc.Server(RPC_URL)
+export const server = new StellarSdk.SorobanRpc.Server(RPC_URL)
 
 // Fetch votes for a specific option (0, 1, or 2)
 export async function getVotes(optionIndex) {
