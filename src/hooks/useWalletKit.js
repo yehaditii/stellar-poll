@@ -131,24 +131,15 @@ export function useWalletKit() {
       const k = getKit()
       
       // Sign the transaction
-      const signResult = await k.signTransaction(xdr, {
+      const signResult = await k.signTx({
+        xdr,
+        publicKeys: [publicKey],
         network: WalletNetwork.TESTNET,
-        networkPassphrase: 'Test SDF Network ; September 2015',
       })
 
-      // Handle different response formats
-      let signedXdr = null
-      if (typeof signResult === 'string') {
-        signedXdr = signResult
-      } else if (signResult?.signedTxXdr) {
-        signedXdr = signResult.signedTxXdr
-      } else if (signResult?.xdr) {
-        signedXdr = signResult.xdr
-      } else if (signResult?.["signed_envelope_xdr"]) {
-        signedXdr = signResult["signed_envelope_xdr"]
-      }
-
-      if (!signedXdr) {
+      // Extract signed XDR from result
+      const signedXdr = signResult?.result
+      if (typeof signedXdr !== 'string' || signedXdr.length === 0) {
         console.error('Sign result:', signResult)
         throw new Error('Failed to sign transaction')
       }

@@ -1,4 +1,4 @@
-import * as FreighterApi from '@stellar/freighter-api'
+import FreighterApi from '@stellar/freighter-api'
 
 /**
  * Check if Freighter wallet is installed
@@ -50,10 +50,10 @@ export async function getWalletPublicKey() {
  */
 export async function signTransaction(transactionXdr) {
   try {
-    const { signedTxXdr } = await FreighterApi.signTransaction(transactionXdr, {
+    const signedTxXdr = await FreighterApi.signTransaction(transactionXdr, {
       networkPassphrase: 'Test SDF Network ; September 2015',
     })
-    if (!signedTxXdr) {
+    if (typeof signedTxXdr !== 'string' || signedTxXdr.length === 0) {
       throw new Error('No signed transaction returned')
     }
     return signedTxXdr
