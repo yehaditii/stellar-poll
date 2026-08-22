@@ -2,6 +2,12 @@
 
 A decentralized voting application built using Stellar Soroban smart contracts with real-time results and multi-wallet support.
 
+**Live Demo:** https://stellar-poll-nine.vercel.app/
+
+## Demo Video
+
+[Watch the demo video](https://youtu.be/7B77MmK9iRg)
+
 ## Features
 
 - Multi-wallet support (Freighter, xBull, Albedo)
@@ -13,23 +19,22 @@ A decentralized voting application built using Stellar Soroban smart contracts w
 ## Screenshots
 
 ### Wallet Connection
-![Wallet Connect](./public/screenshots/wallet-connect.png)
 
-### Wallet Options
+![Wallet Connect](./public/screenshots/wallet-connect.png)
 ![Wallet Options](./public/screenshots/wallet-options.png)
 
-### Voting Interface
+### Voting Flow
 ![Voting UI](./public/screenshots/voting-ui.png)
-
-### Voting Results
-![Results](./public/screenshots/voting-results.png)
+![Voting Results](./public/screenshots/Voting_results.png)
 
 ### Transaction Success
-![Transaction](./public/screenshots/transaction-success.jpeg)
+![Transaction Success](./public/screenshots/transaction-success.jpeg)
 
-### Mobile responsive
+### Mobile Responsive
 ![Mobile UI](./public/screenshots/Mobile-UI.jpeg)
 
+### CI/CD Pipeline
+![CI/CD Pipeline Running](./public/screenshots/CD%20Pipeline%20running.png)
 ## Contract Details
 
 - Network: Stellar Testnet
@@ -91,33 +96,6 @@ npm run build
 
 Output files are in `dist/` directory, ready for deployment.
 
-## Screenshots
-
-### Wallet Connection
-- Clean modal interface
-- Support for 3 wallets
-- Clear error messages
-- Wallet descriptions
-
-### Voting Interface  
-- Main poll question prominently displayed
-- Live on-chain indicator
-- Vote count summary
-- Option selection with hover effects
-- Animated vote submission
-
-### Results Display
-- Real-time vote percentages
-- Animated progress bars
-- Vote count per option
-- Refresh button for manual updates
-- Auto-refresh every 5 seconds
-
-### Transaction Success
-- Transaction hash displayed
-- Copy to clipboard button
-- Link to Stellar Expert explorer
-- Success confirmation message
 
 ## Contract Details
 
